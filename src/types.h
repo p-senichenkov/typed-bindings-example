@@ -1,7 +1,7 @@
 #pragma once
 
+#include <any>
 #include <cstddef>
-
 #include <pybind11/detail/common.h>
 #include <pybind11/pytypes.h>
 
@@ -11,7 +11,7 @@ public:
     virtual std::string ValueToString(std::byte const*) const = 0;
     virtual std::byte const* ValueFromString(std::string const&) const = 0;
     virtual void FreeValue(std::byte const*) const = 0;
-    virtual pybind11::handle GetPythonObject(std::byte const*) const = 0;
+    virtual std::any GetAnyValue(std::byte const*) const = 0;
 };
 
 template <typename T>
@@ -28,8 +28,12 @@ std::byte* AllocateValue(T&& value) {
 
 class IntType final : public Type {
 public:
+    int GetInt(std::byte const* value) const {
+        return GetValue<int>(value);
+    }
+
     std::string ValueToString(std::byte const* value) const override {
-        return std::to_string(GetValue<int>(value));
+        return std::to_string(GetInt(value));
     }
 
     std::byte const* ValueFromString(std::string const& str) const override {
@@ -41,8 +45,8 @@ public:
         delete[] value;
     }
 
-    pybind11::handle GetPythonObject(std::byte const* value) const override {
-        return PyLong_FromLongLong(GetValue<int>(value));
+    std::any GetAnyValue(std::byte const* bytes) const override {
+        return GetInt(bytes);
     }
 };
 
@@ -65,8 +69,8 @@ public:
         reinterpret_cast<std::string const*>(value)->~String();
     }
 
-    pybind11::handle GetPythonObject(std::byte const* value) const override {
-        return PyUnicode_FromString(GetValue<std::string>(value).c_str());
+    std::any GetAnyValue(std::byte const* bytes) const override {
+        return GetValue<std::string>(bytes);
     }
 };
 
