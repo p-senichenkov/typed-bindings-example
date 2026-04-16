@@ -1,0 +1,10 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "typed_bindings"
+version = "0.0.1"
+
+[tool.scikit-build.cmake.define]
+CMAKE_BUILD_TYPE = "Debug"
